@@ -1,6 +1,6 @@
 const readLinesFromFile = require("./fileReader");
 
-const parseGameString = (str, index) => {
+const parseGameStringOneStar = (str, index) => {
   const [, gamesString] = str.split(":");
   const games = gamesString.split(";");
   let isValid = true;
@@ -23,12 +23,41 @@ const parseGameString = (str, index) => {
   return isValid ? index + 1 : 0;
 };
 
+const parseGameStringTwoStars = (str, index) => {
+  const [, gamesString] = str.split(":");
+  const games = gamesString.split(";");
+  const colorCountMap = {
+    red: 0,
+    green: 0,
+    blue: 0,
+  };
+  games.forEach((game) => {
+    const reveals = game.split(",").map((reveal) => reveal.trim());
+    reveals.forEach((reveal) => {
+      const [count, color] = reveal.split(" ");
+      colorCountMap[color] = Math.max(count, colorCountMap[color]);
+    });
+  });
+  let power = 1;
+  Object.keys(colorCountMap).forEach((key) => {
+    power *= colorCountMap[key];
+  });
+  return power;
+};
+
 const filePath = "./day2input.txt";
 readLinesFromFile(filePath, (_err, linesArray) => {
-  const sum = linesArray
-    .map(parseGameString)
+  const oneStarSum = linesArray
+    .map(parseGameStringOneStar)
     .reduce((accumulator, currentValue) => {
       return accumulator + currentValue;
     }, 0);
-  console.log(sum);
+  console.log(oneStarSum);
+
+  const twoStarSum = linesArray
+    .map(parseGameStringTwoStars)
+    .reduce((accumulator, currentValue) => {
+      return accumulator + currentValue;
+    }, 0);
+  console.log(twoStarSum);
 });
