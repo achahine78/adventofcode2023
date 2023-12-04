@@ -34,15 +34,36 @@ const checkHowManyMatches = ({ winningNumbers, numbersYouHave }) => {
   return count;
 };
 
+const processMatches = (matches) => {
+  let result = matches.map((match, index) => [index + 1]);
+  for (let i = 0; i < matches.length - 1; i++) {
+    const numberOfMatches = matches[i];
+    for (let j = 1; j <= numberOfMatches; j++) {
+      for (let k = 0; k < result[i].length; k++)
+        result[i + j].push(result[i + j][0]);
+    }
+  }
+  
+  let count = 0;
+  result.forEach(cardCopies => {
+    count += cardCopies.length;
+  });
+
+  return count;
+};
+
 const filePath = "./day4input.txt";
 
 readLinesFromFile(filePath, (_err, linesArray) => {
-  console.log(
-    linesArray
-      .map(parseCard)
-      .map(checkHowManyMatches)
-      .reduce((accumulator, currentValue) => {
-        return accumulator + (currentValue ? Math.pow(2, currentValue - 1) : 0);
-      }, 0)
-  );
+  const oneStarSum = linesArray
+    .map(parseCard)
+    .map(checkHowManyMatches)
+    .reduce((accumulator, currentValue) => {
+      return accumulator + (currentValue ? Math.pow(2, currentValue - 1) : 0);
+    }, 0);
+  console.log("oneStarSum: ", oneStarSum);
+
+  const matches = linesArray.map(parseCard).map(checkHowManyMatches);
+  const twoStarSum = processMatches(matches)
+  console.log("twoStarSum: ", twoStarSum);
 });
