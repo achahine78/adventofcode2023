@@ -1,9 +1,6 @@
 const readLinesFromFile = require("./fileReader");
 const filePath = "./day10input.txt";
 
-let testInput = [".....", ".S-7.", ".|.|.", ".L-J.", "....."];
-let secondTestInput = ["..F7.", ".FJ|.", "SJ.L7", "|F--J", "LJ..."];
-
 const visited = {};
 
 const getStartingPosition = (map) => {
@@ -26,14 +23,6 @@ const getAdjacentElements = (i, j, map) => {
 
   return result;
 };
-
-// | is a vertical pipe connecting north and south.
-// - is a horizontal pipe connecting east and west.
-//  is a 90-degree bend connecting north and east.
-// J is a 90-degree bend connecting north and west.
-// 7 is a 90-degree bend connecting south and west.
-// F is a 90-degree bend connecting south and east.
-// S is the starting position of the animal; there is a pipe on this tile, but your sketch doesn't show what shape the pipe has.
 
 const getNeighbours = (i, j, map) => {
   const pipeType = map[i][j];
@@ -117,12 +106,11 @@ const getNeighbours = (i, j, map) => {
     }
   }
 
-  return neighbours.filter(([x,y]) => !visited[`${x}-${y}`]);
+  return neighbours.filter(([x, y]) => !visited[`${x}-${y}`]);
 };
 
 const oneStar = (map) => {
   map = map.map((line) => line.split(""));
-  console.log(map)
   let [startI, startJ] = getStartingPosition(map);
 
   let counter = 0;
@@ -139,9 +127,76 @@ const oneStar = (map) => {
       queue.push(neighbour);
     }
   }
-  console.log((counter - 1) / 2)
+  console.log((counter - 1) / 2);
+};
+
+const isInterior = (i, j, map) => {
+  let intersectionCount = 0;
+  for (let x = j; x < map[i].length; x++) {
+    if (visited[`${i}-${x}`]) {
+      intersectionCount++;
+      // map[x][j] = intersectionCount
+    }
+  }
+  return intersectionCount % 2 !== 0;
+}
+
+const isPointInInterior = (matrix, boundary, point) => {
+  const [x, y] = point;
+
+  if (x < 0 || x >= matrix.length || y < 0 || y >= matrix[0].length) {
+      return false;
+  }
+
+  let count = 0;
+
+  for (let i = 0; i < boundary.length; i++) {
+      const [x1, y1] = boundary[i];
+      const [x2, y2] = boundary[(i + 1) % boundary.length];
+
+      if (
+          ((y1 <= y && y < y2) || (y2 <= y && y < y1)) &&
+          x < ((x2 - x1) * (y - y1)) / (y2 - y1) + x1
+      ) {
+          count++;
+      }
+  }
+
+  return count % 2 === 1;
+}
+
+const twoStar = (map) => {
+  map = map.map((line) => line.split(""));
+  let [startI, startJ] = getStartingPosition(map);
+
+  const stack = [[startI, startJ]];
+  const boundary = [];
+
+  while (stack.length) {
+    const [i, j] = stack.pop();
+    visited[`${i}-${j}`] = true;
+    const neighbours = getNeighbours(i, j, map);
+    boundary.push([i, j]);
+    for (const neighbour of neighbours) {
+      stack.push(neighbour);
+    }
+  }
+
+  let counter = 0;
+
+  for (let i = 0; i < map.length; i++) {
+    for (let j = 0; j < map[i].length; j++) {
+      if (!visited[`${i}-${j}`]) {
+        if (isPointInInterior(map, boundary, [i, j])) {
+          counter++
+        }
+      }
+    }
+  }
+
+  console.log(counter);
 };
 
 readLinesFromFile(filePath, (err, linesArray) => {
-  oneStar(linesArray);
+  twoStar(linesArray);
 });
