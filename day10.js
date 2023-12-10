@@ -130,17 +130,6 @@ const oneStar = (map) => {
   console.log((counter - 1) / 2);
 };
 
-const isInterior = (i, j, map) => {
-  let intersectionCount = 0;
-  for (let x = j; x < map[i].length; x++) {
-    if (visited[`${i}-${x}`]) {
-      intersectionCount++;
-      // map[x][j] = intersectionCount
-    }
-  }
-  return intersectionCount % 2 !== 0;
-}
-
 const isPointInInterior = (matrix, boundary, point) => {
   const [x, y] = point;
 
